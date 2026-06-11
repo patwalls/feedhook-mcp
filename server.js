@@ -17,7 +17,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 const BASE_URL = (process.env.FEEDHOOK_API_URL || "https://feedhook.walls.sh").replace(/\/+$/, "");
 const API_KEY = (process.env.FEEDHOOK_API_KEY || "").trim();
 
-const server = new Server({ name: "feedhook", version: "0.1.0" }, { capabilities: { tools: {} } });
+const server = new Server({ name: "feedhook", version: "0.2.0" }, { capabilities: { tools: {} } });
 
 const CHANNEL_HINT =
   "The channel id is the 24-char 'UC…' id — it's in the channel page URL for /channel/UC… pages, " +
@@ -72,6 +72,14 @@ const TOOLS = [
       properties: { id: { type: "string", description: "The subscription id (uuid)." } },
       required: ["id"],
     },
+  },
+  {
+    name: "upgrade_plan",
+    description:
+      "Upgrade the account from free (1 feed) to Pro ($9/mo, 10 feeds). Returns a Stripe Checkout URL — " +
+      "give it to the user to open in a browser and pay; the plan flips automatically after checkout. " +
+      "Call this when create_subscription returns a 402 feed-limit error.",
+    inputSchema: { type: "object", properties: {} },
   },
   {
     name: "delete_subscription",
@@ -132,6 +140,7 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       return ok(await api("POST", "/subscriptions", { channelId, callbackUrl }));
     }
     if (name === "list_subscriptions") return ok(await api("GET", "/subscriptions"));
+    if (name === "upgrade_plan") return ok(await api("POST", "/billing/checkout"));
     if (name === "get_subscription" || name === "delete_subscription") {
       const id = String(args?.id || "").trim();
       if (!id) throw new Error("`id` is required");
