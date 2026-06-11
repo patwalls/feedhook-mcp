@@ -17,11 +17,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 const BASE_URL = (process.env.FEEDHOOK_API_URL || "https://feedhook.walls.sh").replace(/\/+$/, "");
 const API_KEY = (process.env.FEEDHOOK_API_KEY || "").trim();
 
-const server = new Server({ name: "feedhook", version: "0.2.0" }, { capabilities: { tools: {} } });
-
-const CHANNEL_HINT =
-  "The channel id is the 24-char 'UC…' id — it's in the channel page URL for /channel/UC… pages, " +
-  "or in the page source of any youtube.com/@handle page (search for \"channelId\").";
+const server = new Server({ name: "feedhook", version: "0.3.0" }, { capabilities: { tools: {} } });
 
 const TOOLS = [
   {
@@ -47,14 +43,17 @@ const TOOLS = [
       "Turn a YouTube channel into a webhook: Feedhook will POST signed JSON " +
       "{event:'video.published', videoId, title, author, url, publishedAt, …} to callbackUrl ~8s after " +
       "every new video. The response includes a per-subscription `secret` (shown once) for verifying the " +
-      "X-Feedhook-Signature header (sha256 HMAC of the raw body). " + CHANNEL_HINT,
+      "X-Feedhook-Signature header (sha256 HMAC of the raw body).",
     inputSchema: {
       type: "object",
       properties: {
-        channelId: { type: "string", description: "YouTube channel id (UC…, 24 chars)." },
+        channel: {
+          type: "string",
+          description: "The channel as an @handle (e.g. '@mkbhd'), a youtube.com channel URL, or a raw UC… id — resolved server-side.",
+        },
         callbackUrl: { type: "string", description: "The http(s) URL that will receive the webhook POSTs." },
       },
-      required: ["channelId", "callbackUrl"],
+      required: ["channel", "callbackUrl"],
     },
   },
   {
@@ -134,10 +133,10 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
     if (name === "get_account") return ok(await api("GET", "/account"));
     if (name === "create_subscription") {
-      const channelId = String(args?.channelId || "").trim();
+      const channel = String(args?.channel || args?.channelId || "").trim();
       const callbackUrl = String(args?.callbackUrl || "").trim();
-      if (!channelId || !callbackUrl) throw new Error("`channelId` and `callbackUrl` are required");
-      return ok(await api("POST", "/subscriptions", { channelId, callbackUrl }));
+      if (!channel || !callbackUrl) throw new Error("`channel` and `callbackUrl` are required");
+      return ok(await api("POST", "/subscriptions", { channel, callbackUrl }));
     }
     if (name === "list_subscriptions") return ok(await api("GET", "/subscriptions"));
     if (name === "upgrade_plan") return ok(await api("POST", "/billing/checkout"));
