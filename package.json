@@ -1,6 +1,6 @@
 {
   "name": "feedhook-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "mcpName": "io.github.patwalls/feedhook-mcp",
   "description": "MCP server for Feedhook — turn a YouTube channel into a webhook: an HTTP callback the moment a new video is published. Agents can create accounts, subscribe channels, and check delivery logs.",
   "type": "module",

@@ -17,7 +17,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 const BASE_URL = (process.env.FEEDHOOK_API_URL || "https://feedhook.walls.sh").replace(/\/+$/, "");
 const API_KEY = (process.env.FEEDHOOK_API_KEY || "").trim();
 
-const server = new Server({ name: "feedhook", version: "0.3.0" }, { capabilities: { tools: {} } });
+const server = new Server({ name: "feedhook", version: "0.4.0" }, { capabilities: { tools: {} } });
 
 const TOOLS = [
   {
@@ -66,6 +66,17 @@ const TOOLS = [
     description:
       "Get one subscription including its recent delivery log — each delivery shows the videoId, status " +
       "(delivered/retrying/failed), and per-attempt HTTP results. Use this to check whether webhooks are arriving.",
+    inputSchema: {
+      type: "object",
+      properties: { id: { type: "string", description: "The subscription id (uuid)." } },
+      required: ["id"],
+    },
+  },
+  {
+    name: "test_subscription",
+    description:
+      "Send a signed test.ping through the real delivery pipeline to a subscription's callback URL — verify the " +
+      "receiver works without waiting for a real video. Check get_subscription afterwards for the delivery result.",
     inputSchema: {
       type: "object",
       properties: { id: { type: "string", description: "The subscription id (uuid)." } },
@@ -140,6 +151,11 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
     }
     if (name === "list_subscriptions") return ok(await api("GET", "/subscriptions"));
     if (name === "upgrade_plan") return ok(await api("POST", "/billing/checkout"));
+    if (name === "test_subscription") {
+      const id = String(args?.id || "").trim();
+      if (!id) throw new Error("`id` is required");
+      return ok(await api("POST", `/subscriptions/${id}/test`));
+    }
     if (name === "get_subscription" || name === "delete_subscription") {
       const id = String(args?.id || "").trim();
       if (!id) throw new Error("`id` is required");

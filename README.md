@@ -39,6 +39,7 @@ No key yet? Add the server without the env var and ask your agent to call
 | `create_subscription` | channel id + callback URL → webhook on every new video |
 | `list_subscriptions` | All subscriptions with state + delivery counts |
 | `get_subscription` | One subscription incl. recent delivery log (per-attempt HTTP results) |
+| `test_subscription` | Send a signed test.ping through the real pipeline to verify your receiver |
 | `upgrade_plan` | Free → Pro ($9/mo, 10 feeds): returns a Stripe Checkout URL to open in a browser |
 | `delete_subscription` | Unsubscribe + stop deliveries |
 
