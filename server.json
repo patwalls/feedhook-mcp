@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.patwalls/feedhook-mcp",
+  "description": "Turn a YouTube channel into a webhook — a signed HTTP POST ~8s after every new video. No polling, no quota.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/patwalls/feedhook-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "feedhook-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "FEEDHOOK_API_KEY",
+          "description": "Feedhook account API key (create one free via the create_account tool or POST https://feedhook.walls.sh/accounts)",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
